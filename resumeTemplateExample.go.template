@@ -1,0 +1,17 @@
+<html>
+<h1>{{.Basics.Name}}</h1>
+<ul>
+    <li>{{.Basics.Email}} </li>
+    <li>{{.Basics.Phone}} </li>
+    <li>{{.Basics.Summary}}</li>
+    <li>{{.Basics.Location.Address}}, {{.Basics.Location.City}} {</li>
+</ul>
+<h2>Work Experience</h2>
+    {{range .Work}}
+        <h3>{{.Name}} - {{.Position}}</h3>
+        <div>
+            <span>{{.StartDate}} - {{.EndDate}}</span>
+            <span>{{.Summary}}</span>
+        </div>
+    {{end}}
+</html>
