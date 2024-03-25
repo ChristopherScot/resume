@@ -1,0 +1,306 @@
+swagger: '2.0'
+info:
+  description: A Test API for testing lambda/go-swagger integration
+  version: 1.0.0
+  title: Resume
+  # put the contact info for your development or API team
+  contact:
+    email: spam@ChrisScotMartin.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+- name: open
+  description: Calls which are unrestricted
+
+paths:
+  /resume/{id}:
+    get:
+      tags:
+      - open
+      summary: Get a resume by ID
+      operationId: getResume
+      description: |
+        Get a resume by ID
+        ---
+      parameters:
+      - name: id
+        in: path
+        description: ID of resume to return
+        required: true
+        type: string
+        format: uuid
+      produces:
+      - application/json
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Resume'
+        404:
+          description: Resume not found
+        500:
+          description: General Failure
+      x-amazon-apigateway-integration:  
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations
+  /:
+    get:
+      tags:
+      - open
+      summary: API Identifier endpoint
+      operationId: getApiIdentifier
+      description:
+        Endpoint which returns the API version and the running backend version
+      produces:
+      - application/json
+      x-amazon-apigateway-integration:  
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations
+      responses:
+        200:
+          description: Returns API version and running backend version
+          schema:
+            $ref: '#/definitions/SimpleMessageResponse'
+        500:
+          description: General Failure
+
+definitions:
+  Resume:
+    type: object
+    properties:
+      basics:
+        type: object
+        properties:
+          name:
+            type: string
+          label:
+            type: string
+          image:
+            type: string
+          email:
+            type: string
+          phone:
+            type: string
+          url:
+            type: string
+          summary:
+            type: string
+          location:
+            type: object
+            properties:
+              address:
+                type: string
+              postalCode:
+                type: string
+              city:
+                type: string
+              countryCode:
+                type: string
+              region:
+                type: string
+          profiles:
+            type: array
+            items:
+              type: object
+              properties:
+                network:
+                  type: string
+                username:
+                  type: string
+                url:
+                  type: string
+      work:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            position:
+              type: string
+            url:
+              type: string
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+            summary:
+              type: string
+            highlights:
+              type: array
+              items:
+                type: string
+      volunteer:
+        type: array
+        items:
+          type: object
+          properties:
+            organization:
+              type: string
+            position:
+              type: string
+            url:
+              type: string
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+            summary:
+              type: string
+            highlights:
+              type: array
+              items:
+                type: string
+      education:
+        type: array
+        items:
+          type: object
+          properties:
+            institution:
+              type: string
+            url:
+              type: string
+            area:
+              type: string
+            studyType:
+              type: string
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+            score:
+              type: string
+            courses:
+              type: array
+              items:
+                type: string
+      awards:
+        type: array
+        items:
+          type: object
+          properties:
+            title:
+              type: string
+            date:
+              type: string
+              format: date
+            awarder:
+              type: string
+            summary:
+              type: string
+      certificates:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            date:
+              type: string
+              format: date
+            issuer:
+              type: string
+            url:
+              type: string
+      publications:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            publisher:
+              type: string
+            releaseDate:
+              type: string
+              format: date
+            url:
+              type: string
+            summary:
+              type: string
+      skills:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            level:
+              type: string
+            keywords:
+              type: array
+              items:
+                type: string
+                format: byte
+      languages:
+        type: array
+        items:
+          type: object
+          properties:
+            language:
+              type: string
+            fluency:
+              type: string
+      interests:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            keywords:
+              type: array
+              items:
+                type: string
+      references:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            reference:
+              type: string
+      projects:
+        type: array
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+            description:
+              type: string
+            highlights:
+              type: array
+              items:
+                type: string
+            url:
+              type: string
+
+  SimpleMessageResponse:
+    type: object
+    required:
+    - message
+    properties:
+      message:
+        type: string

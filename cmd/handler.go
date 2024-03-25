@@ -9,11 +9,15 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/go-openapi/strfmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 
-	"github.com/ChristopherScot/resume/pkg/models"
+	"github.com/ChristopherScot/resume/models"
 )
+
+// Resumes is a map of resumes
+var Resumes = make(map[string]models.Resume)
 
 func getJSONResumeFromBody(body io.ReadCloser) (models.Resume, error) {
 	// decode the body of the request into a models.Resume struct
@@ -23,9 +27,10 @@ func getJSONResumeFromBody(body io.ReadCloser) (models.Resume, error) {
 	if err != nil {
 		return models.Resume{}, err
 	}
-	if err := jsonResume.Validate(); err != nil {
+	if err := jsonResume.Validate(strfmt.Default); err != nil {
 		return models.Resume{}, err
 	}
+
 	return jsonResume, nil
 }
 

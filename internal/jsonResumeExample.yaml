@@ -1,0 +1,287 @@
+type: object
+properties:
+  basics:
+    type: object
+    properties:
+      name:
+        type: string
+        example: John Doe
+      label:
+        type: string
+        example: Programmer
+      image:
+        type: string
+        example: "https://johndoe.com/me.jpg"
+      email:
+        type: string
+        example: john@gmail.com
+      phone:
+        type: string
+        example: (912) 555-4321
+      url:
+        type: string
+        example: https://johndoe.com
+      summary:
+        type: string
+        example: A summary of John Doe…
+      location:
+        type: object
+        properties:
+          address:
+            type: string
+            example: 2712 Broadway St
+          postalCode:
+            type: string
+            example: CA 94115
+          city:
+            type: string
+            example: San Francisco
+          countryCode:
+            type: string
+            example: US
+          region:
+            type: string
+            example: California
+      profiles:
+        type: array
+        items:
+          type: object
+          properties:
+            network:
+              type: string
+              example: Twitter
+            username:
+              type: string
+              example: john
+            url:
+              type: string
+              example: https://twitter.com/john
+  work:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Company
+        position:
+          type: string
+          example: President
+        url:
+          type: string
+          example: https://company.com
+        startDate:
+          type: string
+          format: date
+          example: 2013-01-01
+        endDate:
+          type: string
+          format: date
+          example: 2014-01-01
+        summary:
+          type: string
+          example: Description…
+        highlights:
+          type: array
+          items:
+            type: string
+            example: Started the company
+  volunteer:
+    type: array
+    items:
+      type: object
+      properties:
+        organization:
+          type: string
+          example: Organization
+        position:
+          type: string
+          example: Volunteer
+        url:
+          type: string
+          example: https://organization.com/
+        startDate:
+          type: string
+          format: date
+          example: 2012-01-01
+        endDate:
+          type: string
+          format: date
+          example: 2013-01-01
+        summary:
+          type: string
+          example: Description…
+        highlights:
+          type: array
+          items:
+            type: string
+            example: Awarded 'Volunteer of the Month'
+  education:
+    type: array
+    items:
+      type: object
+      properties:
+        institution:
+          type: string
+          example: University
+        url:
+          type: string
+          example: https://institution.com/
+        area:
+          type: string
+          example: Software Development
+        studyType:
+          type: string
+          example: Bachelor
+        startDate:
+          type: string
+          format: date
+          example: 2011-01-01
+        endDate:
+          type: string
+          format: date
+          example: 2013-01-01
+        score:
+          type: string
+          example: "4.0"
+        courses:
+          type: array
+          items:
+            type: string
+            example: DB1101 - Basic SQL
+  awards:
+    type: array
+    items:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Award
+        date:
+          type: string
+          format: date
+          example: 2014-11-01
+        awarder:
+          type: string
+          example: Company
+        summary:
+          type: string
+          example: There is no spoon.
+  certificates:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Certificate
+        date:
+          type: string
+          format: date
+          example: 2021-11-07
+        issuer:
+          type: string
+          example: Company
+        url:
+          type: string
+          example: https://certificate.com
+  publications:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Publication
+        publisher:
+          type: string
+          example: Company
+        releaseDate:
+          type: string
+          format: date
+          example: 2014-10-01
+        url:
+          type: string
+          example: https://publication.com
+        summary:
+          type: string
+          example: Description…
+  skills:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Web Development
+        level:
+          type: string
+          example: Master
+        keywords:
+          type: array
+          items:
+            type: string
+            format: byte
+            example: HTML
+  languages:
+    type: array
+    items:
+      type: object
+      properties:
+        language:
+          type: string
+          example: English
+        fluency:
+          type: string
+          example: Native speaker
+  interests:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Wildlife
+        keywords:
+          type: array
+          items:
+            type: string
+            example: Ferrets
+  references:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Jane Doe
+        reference:
+          type: string
+          example: Reference…
+  projects:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Project
+        startDate:
+          type: string
+          format: date
+          example: 2019-01-01
+        endDate:
+          type: string
+          format: date
+          example: 2021-01-01
+        description:
+          type: string
+          example: Description...
+        highlights:
+          type: array
+          items:
+            type: string
+            example: Won award at AIHacks 2016
+        url:
+          type: string
+          example: https://project.com/

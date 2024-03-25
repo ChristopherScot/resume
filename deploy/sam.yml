@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  resume
+
+  SAM Template for simple application to demonstrate use of go-swagger on Lambda.
+
+Resources:
+  ResumeAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+      DefinitionBody:
+        'Fn::Transform':
+          Name: 'AWS::Include'
+          # Replace <bucket> with your bucket name
+          Parameters:
+            Location: ./api-gateway-swagger.yml
+
+  ResumeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./bootstrap.zip
+      Handler: bootstrap
+      Runtime: provided.al2023
+      Architectures: [arm64]
+      Events:
+        ProxyApiRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ResumeAPI
+            Path: /
+            Method: ANY
+        ProxyApiGreedy:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ResumeAPI
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  ResumeFunctionArn:
+    Description: "REST API Handler function"
+    Value: !GetAtt ResumeFunction.Arn
+
+  ResumeAPIArn:
+    Description: "The endpoint to connect to the REST API (dev)"
+    Value: !Join [ '', [ 'https://', !Ref ResumeAPI, '.execute-api.',!Ref 'AWS::Region','.amazonaws.com/dev'] ]
