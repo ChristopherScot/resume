@@ -38,9 +38,29 @@ func configureAPI(api *operations.ResumeAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
+	if api.OpenCreateResumeHandler == nil {
+		api.OpenCreateResumeHandler = open.CreateResumeHandlerFunc(func(params open.CreateResumeParams) middleware.Responder {
+			return middleware.NotImplemented("operation open.CreateResume has not yet been implemented")
+		})
+	}
+	if api.OpenDeleteResumeHandler == nil {
+		api.OpenDeleteResumeHandler = open.DeleteResumeHandlerFunc(func(params open.DeleteResumeParams) middleware.Responder {
+			return middleware.NotImplemented("operation open.DeleteResume has not yet been implemented")
+		})
+	}
+	if api.OpenGetAPIIdentifierHandler == nil {
+		api.OpenGetAPIIdentifierHandler = open.GetAPIIdentifierHandlerFunc(func(params open.GetAPIIdentifierParams) middleware.Responder {
+			return middleware.NotImplemented("operation open.GetAPIIdentifier has not yet been implemented")
+		})
+	}
 	if api.OpenGetResumeHandler == nil {
 		api.OpenGetResumeHandler = open.GetResumeHandlerFunc(func(params open.GetResumeParams) middleware.Responder {
 			return middleware.NotImplemented("operation open.GetResume has not yet been implemented")
+		})
+	}
+	if api.OpenUpdateResumeHandler == nil {
+		api.OpenUpdateResumeHandler = open.UpdateResumeHandlerFunc(func(params open.UpdateResumeParams) middleware.Responder {
+			return middleware.NotImplemented("operation open.UpdateResume has not yet been implemented")
 		})
 	}
 

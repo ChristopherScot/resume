@@ -5,6 +5,19 @@ Description: >
 
   SAM Template for simple application to demonstrate use of go-swagger on Lambda.
 
+# Define the actual values of application name and env here as a string to be references later
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 128
+    # Tracing: Active
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref Database
+  # Api:
+  #   TracingEnabled: true
+
+
 Resources:
   ResumeAPI:
     Type: AWS::Serverless::Api
@@ -13,13 +26,24 @@ Resources:
       DefinitionBody:
         'Fn::Transform':
           Name: 'AWS::Include'
-          # Replace <bucket> with your bucket name
           Parameters:
             Location: ./api-gateway-swagger.yml
 
   ResumeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Database
+        - AWSLambdaBasicExecutionRole
+      Environment:
+        Variables:
+          SERVICE: "resume"
+          ENVIRONMENT: 'dev'
+          VERSION: "1.0.0"
+          REGION: !Ref 'AWS::Region'
+          TYPE: "lambda"
+          RESUME_TABLE: !Ref Database
       CodeUri: ./bootstrap.zip
       Handler: bootstrap
       Runtime: provided.al2023
@@ -37,6 +61,18 @@ Resources:
             RestApiId: !Ref ResumeAPI
             Path: /{proxy+}
             Method: ANY
+
+  Database:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: "dev-resumes2"
+        AttributeDefinitions:
+          - AttributeName: "id"
+            AttributeType: "S"
+        KeySchema:
+          - AttributeName: "id"
+            KeyType: "HASH"
+        BillingMode: "PAY_PER_REQUEST"
 
 Outputs:
   ResumeFunctionArn:

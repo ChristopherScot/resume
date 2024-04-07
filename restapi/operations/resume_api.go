@@ -44,11 +44,20 @@ func NewResumeAPI(spec *loads.Document) *ResumeAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		OpenCreateResumeHandler: open.CreateResumeHandlerFunc(func(params open.CreateResumeParams) middleware.Responder {
+			return middleware.NotImplemented("operation open.CreateResume has not yet been implemented")
+		}),
+		OpenDeleteResumeHandler: open.DeleteResumeHandlerFunc(func(params open.DeleteResumeParams) middleware.Responder {
+			return middleware.NotImplemented("operation open.DeleteResume has not yet been implemented")
+		}),
 		OpenGetAPIIdentifierHandler: open.GetAPIIdentifierHandlerFunc(func(params open.GetAPIIdentifierParams) middleware.Responder {
 			return middleware.NotImplemented("operation open.GetAPIIdentifier has not yet been implemented")
 		}),
 		OpenGetResumeHandler: open.GetResumeHandlerFunc(func(params open.GetResumeParams) middleware.Responder {
 			return middleware.NotImplemented("operation open.GetResume has not yet been implemented")
+		}),
+		OpenUpdateResumeHandler: open.UpdateResumeHandlerFunc(func(params open.UpdateResumeParams) middleware.Responder {
+			return middleware.NotImplemented("operation open.UpdateResume has not yet been implemented")
 		}),
 	}
 }
@@ -86,10 +95,16 @@ type ResumeAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
+	// OpenCreateResumeHandler sets the operation handler for the create resume operation
+	OpenCreateResumeHandler open.CreateResumeHandler
+	// OpenDeleteResumeHandler sets the operation handler for the delete resume operation
+	OpenDeleteResumeHandler open.DeleteResumeHandler
 	// OpenGetAPIIdentifierHandler sets the operation handler for the get Api identifier operation
 	OpenGetAPIIdentifierHandler open.GetAPIIdentifierHandler
 	// OpenGetResumeHandler sets the operation handler for the get resume operation
 	OpenGetResumeHandler open.GetResumeHandler
+	// OpenUpdateResumeHandler sets the operation handler for the update resume operation
+	OpenUpdateResumeHandler open.UpdateResumeHandler
 
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
@@ -167,11 +182,20 @@ func (o *ResumeAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.OpenCreateResumeHandler == nil {
+		unregistered = append(unregistered, "open.CreateResumeHandler")
+	}
+	if o.OpenDeleteResumeHandler == nil {
+		unregistered = append(unregistered, "open.DeleteResumeHandler")
+	}
 	if o.OpenGetAPIIdentifierHandler == nil {
 		unregistered = append(unregistered, "open.GetAPIIdentifierHandler")
 	}
 	if o.OpenGetResumeHandler == nil {
 		unregistered = append(unregistered, "open.GetResumeHandler")
+	}
+	if o.OpenUpdateResumeHandler == nil {
+		unregistered = append(unregistered, "open.UpdateResumeHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -261,6 +285,14 @@ func (o *ResumeAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/resume"] = open.NewCreateResume(o.context, o.OpenCreateResumeHandler)
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/resume/{id}"] = open.NewDeleteResume(o.context, o.OpenDeleteResumeHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -269,6 +301,10 @@ func (o *ResumeAPI) initHandlerCache() {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
 	o.handlers["GET"]["/resume/{id}"] = open.NewGetResume(o.context, o.OpenGetResumeHandler)
+	if o.handlers["PUT"] == nil {
+		o.handlers["PUT"] = make(map[string]http.Handler)
+	}
+	o.handlers["PUT"]["/resume/{id}"] = open.NewUpdateResume(o.context, o.OpenUpdateResumeHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

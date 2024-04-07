@@ -1,14 +1,20 @@
 package main
 
 import (
+	"context"
+	"log/slog"
 	"net/http"
+	"os"
 
+	"github.com/ChristopherScot/resume/db"
 	"github.com/ChristopherScot/resume/handlers"
+	"github.com/ChristopherScot/resume/lib"
 	"github.com/ChristopherScot/resume/restapi"
 	"github.com/ChristopherScot/resume/restapi/operations"
 	"github.com/ChristopherScot/resume/restapi/operations/open"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 	loads "github.com/go-openapi/loads"
 )
@@ -26,12 +32,23 @@ func setupHandlers() *operations.ResumeAPI {
 	api := operations.NewResumeAPI(swaggerSpec)
 	api.OpenGetAPIIdentifierHandler = open.GetAPIIdentifierHandlerFunc(handlers.GetApiIdentifier)
 	api.OpenGetResumeHandler = open.GetResumeHandlerFunc(handlers.GetResume)
-
+	api.OpenCreateResumeHandler = open.CreateResumeHandlerFunc(handlers.CreateResume)
 	return api
 }
-
 func init() {
-
+	// Setup Logging
+	slog.SetDefault(lib.NewAugmentedLogger())
+	// Setup AWS SDK
+	sdkConfig, err := config.LoadDefaultConfig(
+		context.Background(),
+		config.WithRegion(os.Getenv("REGION")),
+	)
+	if err != nil {
+		slog.Error("unable to load SDK config", "error", err)
+		os.Exit(1)
+	}
+	// Setup DynamoDB
+	db.DBClient = db.NewClient(sdkConfig)
 	api := setupHandlers()
 	server := restapi.NewServer(api)
 	server.ConfigureAPI()

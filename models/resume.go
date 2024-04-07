@@ -871,7 +871,8 @@ type ResumeBasics struct {
 
 	// email
 	// Example: john@gmail.com
-	Email string `json:"email,omitempty"`
+	// Required: true
+	Email *string `json:"email"`
 
 	// image
 	// Example: https://johndoe.com/me.jpg
@@ -886,18 +887,21 @@ type ResumeBasics struct {
 
 	// name
 	// Example: John Doe
-	Name string `json:"name,omitempty"`
+	// Required: true
+	Name *string `json:"name"`
 
 	// phone
 	// Example: (912) 555-4321
-	Phone string `json:"phone,omitempty"`
+	// Required: true
+	Phone *string `json:"phone"`
 
 	// profiles
 	Profiles []*ResumeBasicsProfilesItems0 `json:"profiles"`
 
 	// summary
 	// Example: A summary of John Doe…
-	Summary string `json:"summary,omitempty"`
+	// Required: true
+	Summary *string `json:"summary"`
 
 	// url
 	// Example: https://johndoe.com
@@ -908,7 +912,19 @@ type ResumeBasics struct {
 func (m *ResumeBasics) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateEmail(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if err := m.validateLocation(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validateName(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if err := m.validatePhone(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -916,9 +932,22 @@ func (m *ResumeBasics) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateSummary(formats); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *ResumeBasics) validateEmail(formats strfmt.Registry) error {
+
+	if err := validate.Required("basics"+"."+"email", "body", m.Email); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -936,6 +965,24 @@ func (m *ResumeBasics) validateLocation(formats strfmt.Registry) error {
 			}
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m *ResumeBasics) validateName(formats strfmt.Registry) error {
+
+	if err := validate.Required("basics"+"."+"name", "body", m.Name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *ResumeBasics) validatePhone(formats strfmt.Registry) error {
+
+	if err := validate.Required("basics"+"."+"phone", "body", m.Phone); err != nil {
+		return err
 	}
 
 	return nil
@@ -962,6 +1009,15 @@ func (m *ResumeBasics) validateProfiles(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (m *ResumeBasics) validateSummary(formats strfmt.Registry) error {
+
+	if err := validate.Required("basics"+"."+"summary", "body", m.Summary); err != nil {
+		return err
 	}
 
 	return nil
@@ -1628,7 +1684,7 @@ func (m *ResumeReferencesItems0) UnmarshalBinary(b []byte) error {
 type ResumeSkillsItems0 struct {
 
 	// keywords
-	Keywords []strfmt.Base64 `json:"keywords"`
+	Keywords []string `json:"keywords"`
 
 	// level
 	// Example: Master

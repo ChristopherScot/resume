@@ -1,8 +1,18 @@
 #! /usr/bin/env bash
+set -e
 
 echo
 echo "Building application..."
-# GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o resume main.go
+if [ "$1" = "amd64" ]; then
+    echo "Building for Linux environment..."
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap main.go
+elif [ "$1" = "arm64" ]; then
+    echo "Building for ARM64 environment..."
+    GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o bootstrap main.go
+else
+    echo "Building for local environment..."
+    go build -o bootstrap main.go
+fi
 GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o bootstrap main.go
 
 

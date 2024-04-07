@@ -15,6 +15,10 @@ info:
 tags:
 - name: open
   description: Calls which are unrestricted
+- name: user
+  description: Calls which require authentication
+- name: admin
+  description: Calls which require admin rights
 
 paths:
   /resume/{id}:
@@ -27,12 +31,12 @@ paths:
         Get a resume by ID
         ---
       parameters:
-      - name: id
-        in: path
-        description: ID of resume to return
-        required: true
-        type: string
-        format: uuid
+        - name: id
+          in: path
+          required: true
+          description: ID of resume to return
+          type: string
+          format: uuid
       produces:
       - application/json
       responses:
@@ -42,8 +46,129 @@ paths:
             $ref: '#/definitions/Resume'
         404:
           description: Resume not found
+          schema:
+            $ref: '#/definitions/SimpleErrorResponse'
         500:
           description: General Failure
+      x-amazon-apigateway-integration:  
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations
+    put:
+      tags:
+      - open
+      summary: Update an existing resume
+      operationId: updateResume
+      description: |
+        Update an existing resume
+        ---
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of resume to update
+        type: string
+        format: uuid
+      - name: resume
+        in: body
+        description: Resume object
+        required: true
+        schema:
+          $ref: '#/definitions/Resume'
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Resume updated
+          schema:
+            $ref: '#/definitions/UUIDResponse'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/SimpleErrorResponse'
+        404:
+          description: Resume not found
+          schema:
+            $ref: '#/definitions/SimpleErrorResponse'
+        500:
+          description: General Failure
+          schema:
+            $ref: '#/definitions/SimpleErrorResponse'
+      x-amazon-apigateway-integration:  
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations
+    delete:
+      tags:
+      - open
+      summary: Delete a resume
+      operationId: deleteResume
+      description: |
+        Delete a resume
+        ---
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID of resume to delete
+        type: string
+        format: uuid
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Resume deleted
+          schema:
+            $ref: '#/definitions/UUIDResponse'
+        404:
+          description: Resume not found
+          schema:
+            $ref: '#/definitions/SimpleErrorResponse'
+        500:
+          description: General Failure
+          schema:
+            $ref: '#/definitions/SimpleErrorResponse'
+      x-amazon-apigateway-integration:  
+        httpMethod: post
+        type: aws_proxy
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations
+  /resume:
+    post:
+      tags:
+      - open
+      summary: Create a new resume
+      operationId: createResume
+      description: |
+        Create a new resume
+        ---
+      parameters:
+      - name: id
+        in: body
+        description: New Resume ID
+        schema:
+          $ref: '#/definitions/Resume'
+      produces:
+      - application/json
+      consumes:
+      - application/json
+      responses:
+        201:
+          description: Resume created
+          schema:
+            $ref: '#/definitions/UUIDResponse'
+        400:
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/SimpleErrorResponse'
+        500:
+          description: General Failure
+          schema:
+            $ref: '#/definitions/SimpleErrorResponse'
       x-amazon-apigateway-integration:  
         httpMethod: post
         type: aws_proxy
@@ -73,10 +198,33 @@ paths:
           description: General Failure
 
 definitions:
+  ResumeMetaData:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+      created:
+        type: string
+        format: date-time
+      updated:
+        type: string
+        format: date-time
+      user:
+        type: string
+      tags:
+        type: object
+        additionalProperties:
+          type: string
   Resume:
     type: object
     properties:
       basics:
+        required:
+          - name
+          - email
+          - phone
+          - summary      
         type: object
         properties:
           name:
@@ -245,7 +393,6 @@ definitions:
               type: array
               items:
                 type: string
-                format: byte
       languages:
         type: array
         items:
@@ -297,6 +444,15 @@ definitions:
             url:
               type: string
 
+  UUIDResponse:
+    type: object
+    required:
+    - id
+    properties:
+      id:
+        type: string
+        format: uuid
+
   SimpleMessageResponse:
     type: object
     required:
@@ -304,3 +460,16 @@ definitions:
     properties:
       message:
         type: string
+
+  SimpleErrorResponse:
+    type: object
+    required:
+    - error
+    properties:
+      error:
+        type: string
+
+  ResumeID:
+    type: string
+    description: ID of resume to return
+    format: uuid

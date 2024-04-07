@@ -1,0 +1,153 @@
+package db
+
+import (
+	"context"
+	"os"
+
+	"github.com/ChristopherScot/resume/models"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+)
+
+var DBClient *dynamodb.Client
+var resumeTable = os.Getenv("RESUME_TABLE")
+
+type ResumeWithID struct {
+	ID     string        `json:"id" dynamodbav:"id"`
+	Resume models.Resume `json:"resume"`
+}
+
+func NewClient(sdkConfig aws.Config) *dynamodb.Client {
+	return dynamodb.NewFromConfig(sdkConfig)
+}
+
+func GetAllResumes(ctx context.Context) ([]models.Resume, error) {
+	input := &dynamodb.ScanInput{
+		TableName: aws.String(resumeTable),
+	}
+
+	result, err := DBClient.Scan(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	resumes := make([]models.Resume, 0)
+	for _, item := range result.Items {
+		var resume models.Resume
+		err = attributevalue.UnmarshalMap(item, &resume)
+		if err != nil {
+			return nil, err
+		}
+
+		resumes = append(resumes, resume)
+	}
+
+	return resumes, nil
+}
+
+func GetAllResumeids(ctx context.Context) ([]string, error) {
+	input := &dynamodb.ScanInput{
+		TableName: aws.String(resumeTable),
+	}
+
+	result, err := DBClient.Scan(ctx, input)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]string, 0)
+	for _, item := range result.Items {
+		ids = append(ids, item["id"].(*types.AttributeValueMemberS).Value)
+	}
+
+	return ids, nil
+}
+
+func GetResume(ctx context.Context, id string) (models.Resume, error) {
+	input := &dynamodb.GetItemInput{
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: id},
+		},
+		TableName: aws.String(resumeTable),
+	}
+
+	result, err := DBClient.GetItem(ctx, input)
+	if err != nil {
+		return models.Resume{}, err
+	}
+
+	var resume models.Resume
+	err = attributevalue.UnmarshalMap(result.Item, &resume)
+	if err != nil {
+		return models.Resume{}, err
+	}
+
+	return resume, nil
+}
+
+func CreateResume(ctx context.Context, id string, resume models.Resume) error {
+	item, err := attributevalue.MarshalMap(&ResumeWithID{
+		ID:     id,
+		Resume: resume,
+	})
+	if err != nil {
+		return err
+	}
+
+	input := &dynamodb.PutItemInput{
+		Item:      item,
+		TableName: aws.String(resumeTable),
+	}
+
+	_, err = DBClient.PutItem(ctx, input)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DeleteResume(ctx context.Context, id string) error {
+	input := &dynamodb.DeleteItemInput{
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: id},
+		},
+		TableName: aws.String(resumeTable),
+	}
+
+	_, err := DBClient.DeleteItem(ctx, input)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateResume(ctx context.Context, id string, resume models.Resume) error {
+	item, err := attributevalue.MarshalMap(&ResumeWithID{
+		ID:     id,
+		Resume: resume,
+	})
+	if err != nil {
+		return err
+	}
+
+	input := &dynamodb.UpdateItemInput{
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{Value: id},
+		},
+		TableName:                 aws.String(resumeTable),
+		UpdateExpression:          aws.String("set resume = :r"),
+		ExpressionAttributeValues: item,
+	}
+
+	_, err = DBClient.UpdateItem(ctx, input)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

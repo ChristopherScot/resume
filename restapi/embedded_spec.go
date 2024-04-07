@@ -63,6 +63,59 @@ func init() {
         }
       }
     },
+    "/resume": {
+      "post": {
+        "description": "Create a new resume\n---\n",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "open"
+        ],
+        "summary": "Create a new resume",
+        "operationId": "createResume",
+        "parameters": [
+          {
+            "description": "New Resume ID",
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Resume"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Resume created",
+            "schema": {
+              "$ref": "#/definitions/UUIDResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          },
+          "500": {
+            "description": "General Failure",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "httpMethod": "post",
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations"
+          }
+        }
+      }
+    },
     "/resume/{id}": {
       "get": {
         "description": "Get a resume by ID\n---\n",
@@ -92,10 +145,127 @@ func init() {
             }
           },
           "404": {
-            "description": "Resume not found"
+            "description": "Resume not found",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
           },
           "500": {
             "description": "General Failure"
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "httpMethod": "post",
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations"
+          }
+        }
+      },
+      "put": {
+        "description": "Update an existing resume\n---\n",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "open"
+        ],
+        "summary": "Update an existing resume",
+        "operationId": "updateResume",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of resume to update",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Resume object",
+            "name": "resume",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Resume"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume updated",
+            "schema": {
+              "$ref": "#/definitions/UUIDResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Resume not found",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          },
+          "500": {
+            "description": "General Failure",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "httpMethod": "post",
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a resume\n---\n",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "open"
+        ],
+        "summary": "Delete a resume",
+        "operationId": "deleteResume",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of resume to delete",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume deleted",
+            "schema": {
+              "$ref": "#/definitions/UUIDResponse"
+            }
+          },
+          "404": {
+            "description": "Resume not found",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          },
+          "500": {
+            "description": "General Failure",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
           }
         },
         "x-amazon-apigateway-integration": {
@@ -139,6 +309,12 @@ func init() {
         },
         "basics": {
           "type": "object",
+          "required": [
+            "name",
+            "email",
+            "phone",
+            "summary"
+          ],
           "properties": {
             "email": {
               "type": "string",
@@ -411,7 +587,6 @@ func init() {
                 "type": "array",
                 "items": {
                   "type": "string",
-                  "format": "byte",
                   "example": "HTML"
                 }
               },
@@ -510,6 +685,53 @@ func init() {
         }
       }
     },
+    "ResumeID": {
+      "description": "ID of resume to return",
+      "type": "string",
+      "format": "uuid"
+    },
+    "ResumeMetaData": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "example": {
+            "key1": "value1",
+            "key2": "value2"
+          }
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "user": {
+          "type": "string",
+          "example": "John Doe"
+        }
+      }
+    },
+    "SimpleErrorResponse": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      }
+    },
     "SimpleMessageResponse": {
       "type": "object",
       "required": [
@@ -520,12 +742,32 @@ func init() {
           "type": "string"
         }
       }
+    },
+    "UUIDResponse": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
     }
   },
   "tags": [
     {
       "description": "Calls which are unrestricted",
       "name": "open"
+    },
+    {
+      "description": "Calls which require authentication",
+      "name": "user"
+    },
+    {
+      "description": "Calls which require admin rights",
+      "name": "admin"
     }
   ]
 }`))
@@ -575,6 +817,59 @@ func init() {
         }
       }
     },
+    "/resume": {
+      "post": {
+        "description": "Create a new resume\n---\n",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "open"
+        ],
+        "summary": "Create a new resume",
+        "operationId": "createResume",
+        "parameters": [
+          {
+            "description": "New Resume ID",
+            "name": "id",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Resume"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Resume created",
+            "schema": {
+              "$ref": "#/definitions/UUIDResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          },
+          "500": {
+            "description": "General Failure",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "httpMethod": "post",
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations"
+          }
+        }
+      }
+    },
     "/resume/{id}": {
       "get": {
         "description": "Get a resume by ID\n---\n",
@@ -604,10 +899,127 @@ func init() {
             }
           },
           "404": {
-            "description": "Resume not found"
+            "description": "Resume not found",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
           },
           "500": {
             "description": "General Failure"
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "httpMethod": "post",
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations"
+          }
+        }
+      },
+      "put": {
+        "description": "Update an existing resume\n---\n",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "open"
+        ],
+        "summary": "Update an existing resume",
+        "operationId": "updateResume",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of resume to update",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Resume object",
+            "name": "resume",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Resume"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume updated",
+            "schema": {
+              "$ref": "#/definitions/UUIDResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Resume not found",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          },
+          "500": {
+            "description": "General Failure",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "httpMethod": "post",
+          "type": "aws_proxy",
+          "uri": {
+            "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResumeFunction.Arn}/invocations"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete a resume\n---\n",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "open"
+        ],
+        "summary": "Delete a resume",
+        "operationId": "deleteResume",
+        "parameters": [
+          {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of resume to delete",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resume deleted",
+            "schema": {
+              "$ref": "#/definitions/UUIDResponse"
+            }
+          },
+          "404": {
+            "description": "Resume not found",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
+          },
+          "500": {
+            "description": "General Failure",
+            "schema": {
+              "$ref": "#/definitions/SimpleErrorResponse"
+            }
           }
         },
         "x-amazon-apigateway-integration": {
@@ -632,6 +1044,12 @@ func init() {
         },
         "basics": {
           "type": "object",
+          "required": [
+            "name",
+            "email",
+            "phone",
+            "summary"
+          ],
           "properties": {
             "email": {
               "type": "string",
@@ -780,6 +1198,12 @@ func init() {
     },
     "ResumeBasics": {
       "type": "object",
+      "required": [
+        "name",
+        "email",
+        "phone",
+        "summary"
+      ],
       "properties": {
         "email": {
           "type": "string",
@@ -948,6 +1372,11 @@ func init() {
         }
       }
     },
+    "ResumeID": {
+      "description": "ID of resume to return",
+      "type": "string",
+      "format": "uuid"
+    },
     "ResumeInterestsItems0": {
       "type": "object",
       "properties": {
@@ -974,6 +1403,37 @@ func init() {
         "language": {
           "type": "string",
           "example": "English"
+        }
+      }
+    },
+    "ResumeMetaData": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "tags": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "example": {
+            "key1": "value1",
+            "key2": "value2"
+          }
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "user": {
+          "type": "string",
+          "example": "John Doe"
         }
       }
     },
@@ -1057,7 +1517,6 @@ func init() {
           "type": "array",
           "items": {
             "type": "string",
-            "format": "byte",
             "example": "HTML"
           }
         },
@@ -1147,6 +1606,17 @@ func init() {
         }
       }
     },
+    "SimpleErrorResponse": {
+      "type": "object",
+      "required": [
+        "error"
+      ],
+      "properties": {
+        "error": {
+          "type": "string"
+        }
+      }
+    },
     "SimpleMessageResponse": {
       "type": "object",
       "required": [
@@ -1157,12 +1627,32 @@ func init() {
           "type": "string"
         }
       }
+    },
+    "UUIDResponse": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        }
+      }
     }
   },
   "tags": [
     {
       "description": "Calls which are unrestricted",
       "name": "open"
+    },
+    {
+      "description": "Calls which require authentication",
+      "name": "user"
+    },
+    {
+      "description": "Calls which require admin rights",
+      "name": "admin"
     }
   ]
 }`))
