@@ -33,10 +33,10 @@ type CreateResumeParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
-	/*New Resume ID
+	/*Resume to create
 	  In: body
 	*/
-	ID *models.Resume
+	Resume *models.Resume
 }
 
 // BindRequest both binds and validates a request, it assumes that complex things implement a Validatable(strfmt.Registry) error interface
@@ -52,7 +52,7 @@ func (o *CreateResumeParams) BindRequest(r *http.Request, route *middleware.Matc
 		defer r.Body.Close()
 		var body models.Resume
 		if err := route.Consumer.Consume(r.Body, &body); err != nil {
-			res = append(res, errors.NewParseError("id", "body", "", err))
+			res = append(res, errors.NewParseError("resume", "body", "", err))
 		} else {
 			// validate body object
 			if err := body.Validate(route.Formats); err != nil {
@@ -65,7 +65,7 @@ func (o *CreateResumeParams) BindRequest(r *http.Request, route *middleware.Matc
 			}
 
 			if len(res) == 0 {
-				o.ID = &body
+				o.Resume = &body
 			}
 		}
 	}

@@ -79,8 +79,8 @@ func init() {
         "operationId": "createResume",
         "parameters": [
           {
-            "description": "New Resume ID",
-            "name": "id",
+            "description": "Resume to create",
+            "name": "Resume",
             "in": "body",
             "schema": {
               "$ref": "#/definitions/Resume"
@@ -833,8 +833,8 @@ func init() {
         "operationId": "createResume",
         "parameters": [
           {
-            "description": "New Resume ID",
-            "name": "id",
+            "description": "Resume to create",
+            "name": "Resume",
             "in": "body",
             "schema": {
               "$ref": "#/definitions/Resume"

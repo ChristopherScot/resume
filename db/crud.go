@@ -2,9 +2,12 @@ package db
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/ChristopherScot/resume/models"
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -79,8 +82,17 @@ func GetResume(ctx context.Context, id string) (models.Resume, error) {
 		return models.Resume{}, err
 	}
 
+	if result.Item == nil {
+		return models.Resume{}, fmt.Errorf("resume not found")
+	}
+	resumeItem := result.Item["Resume"].(*types.AttributeValueMemberM)
+
+	slog.Info("dynamodb result", "result", spew.Sdump(resumeItem))
+
 	var resume models.Resume
-	err = attributevalue.UnmarshalMap(result.Item, &resume)
+	err = attributevalue.UnmarshalMap(resumeItem.Value, &resume)
+	slog.Info("resume", "resume", resume)
+
 	if err != nil {
 		return models.Resume{}, err
 	}

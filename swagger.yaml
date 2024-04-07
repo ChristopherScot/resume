@@ -147,9 +147,9 @@ paths:
         Create a new resume
         ---
       parameters:
-      - name: id
+      - name: Resume
         in: body
-        description: New Resume ID
+        description: Resume to create
         schema:
           $ref: '#/definitions/Resume'
       produces:
