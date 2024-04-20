@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/ChristopherScot/resume/models"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/davecgh/go-spew/spew"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -51,7 +52,7 @@ func GetAllResumes(ctx context.Context) ([]models.Resume, error) {
 	return resumes, nil
 }
 
-func GetAllResumeids(ctx context.Context) ([]string, error) {
+func GetAllResumeIDs(ctx context.Context) ([]string, error) {
 	input := &dynamodb.ScanInput{
 		TableName: aws.String(resumeTable),
 	}
@@ -100,7 +101,7 @@ func GetResume(ctx context.Context, id string) (models.Resume, error) {
 	return resume, nil
 }
 
-func CreateResume(ctx context.Context, id string, resume models.Resume) error {
+func CreateResume(ctx context.Context, id string, resume models.Resume, metadata models.ResumeMetadata) error {
 	item, err := attributevalue.MarshalMap(&ResumeWithID{
 		ID:     id,
 		Resume: resume,
@@ -108,7 +109,13 @@ func CreateResume(ctx context.Context, id string, resume models.Resume) error {
 	if err != nil {
 		return err
 	}
-
+	metadataMap, err := attributevalue.MarshalMap(metadata)
+	if err != nil {
+		return err
+	}
+	for k, v := range metadataMap {
+		item[k] = v
+	}
 	input := &dynamodb.PutItemInput{
 		Item:      item,
 		TableName: aws.String(resumeTable),
@@ -138,7 +145,7 @@ func DeleteResume(ctx context.Context, id string) error {
 	return nil
 }
 
-func UpdateResume(ctx context.Context, id string, resume models.Resume) error {
+func UpdateResume(ctx context.Context, id string, resume models.Resume, metadata models.ResumeMetadata) error {
 	item, err := attributevalue.MarshalMap(&ResumeWithID{
 		ID:     id,
 		Resume: resume,
@@ -146,14 +153,28 @@ func UpdateResume(ctx context.Context, id string, resume models.Resume) error {
 	if err != nil {
 		return err
 	}
+	metadataMap, err := attributevalue.MarshalMap(metadata)
+	if err != nil {
+		return err
+	}
+	for k, v := range metadataMap {
+		item[k] = v
+	}
+	update := expression.Set(expression.Name("Resume"), expression.Value(resume)).
+		Set(expression.Name("Updated"), expression.Value(metadata.Updated))
 
+	exp, err := expression.NewBuilder().WithUpdate(update).Build()
+	if err != nil {
+		return err
+	}
 	input := &dynamodb.UpdateItemInput{
 		Key: map[string]types.AttributeValue{
 			"id": &types.AttributeValueMemberS{Value: id},
 		},
+		UpdateExpression:          exp.Update(),
+		ExpressionAttributeValues: exp.Values(),
+		ExpressionAttributeNames:  exp.Names(),
 		TableName:                 aws.String(resumeTable),
-		UpdateExpression:          aws.String("set resume = :r"),
-		ExpressionAttributeValues: item,
 	}
 
 	_, err = DBClient.UpdateItem(ctx, input)

@@ -33,6 +33,8 @@ func setupHandlers() *operations.ResumeAPI {
 	api.OpenGetAPIIdentifierHandler = open.GetAPIIdentifierHandlerFunc(handlers.GetApiIdentifier)
 	api.OpenGetResumeHandler = open.GetResumeHandlerFunc(handlers.GetResume)
 	api.OpenCreateResumeHandler = open.CreateResumeHandlerFunc(handlers.CreateResume)
+	api.OpenUpdateResumeHandler = open.UpdateResumeHandlerFunc(handlers.UpdateResume)
+	api.OpenDeleteResumeHandler = open.DeleteResumeHandlerFunc(handlers.DeleteResume)
 	return api
 }
 func init() {

@@ -1,9 +1,15 @@
-PROJECT = resume
+PROJECT=resume
 
 generate: 
 	rm -rf ./restapi
 	swagger generate server -f swagger.yaml
+	swagger generate markdown -f swagger.yaml --output=./docs/api.md
 
+
+clients:
+	swagger generate cli
+	go mod tidy
+	go build -o ./bin/${PROJECT}-cli ./cmd/cli/main.go
 
 run:
 	go run ./cmd/${PROJECT}-server/main.go

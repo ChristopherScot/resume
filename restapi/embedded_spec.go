@@ -690,16 +690,12 @@ func init() {
       "type": "string",
       "format": "uuid"
     },
-    "ResumeMetaData": {
+    "ResumeMetadata": {
       "type": "object",
       "properties": {
         "created": {
           "type": "string",
           "format": "date-time"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
         },
         "tags": {
           "type": "object",
@@ -1406,16 +1402,12 @@ func init() {
         }
       }
     },
-    "ResumeMetaData": {
+    "ResumeMetadata": {
       "type": "object",
       "properties": {
         "created": {
           "type": "string",
           "format": "date-time"
-        },
-        "id": {
-          "type": "string",
-          "format": "uuid"
         },
         "tags": {
           "type": "object",

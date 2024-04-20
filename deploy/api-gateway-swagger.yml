@@ -198,12 +198,9 @@ paths:
           description: General Failure
 
 definitions:
-  ResumeMetaData:
+  ResumeMetadata:
     type: object
     properties:
-      id:
-        type: string
-        format: uuid
       created:
         type: string
         format: date-time
