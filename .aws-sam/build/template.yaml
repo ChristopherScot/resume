@@ -26,6 +26,11 @@ Resources:
   ResumeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      LoggingConfig:
+        ApplicationLogLevel: TRACE
+        LogGroup: dev--resume
+        LogFormat: JSON
+        SystemLogLevel: WARN
       Policies:
       - DynamoDBCrudPolicy:
           TableName:
